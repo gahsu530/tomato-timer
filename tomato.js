@@ -3,11 +3,9 @@ $(document).ready(function() {
     // 1. 變數與基礎設定
     // ==========================================
     let timer;
-    let timeLeft = 25; // 測試用
+    let timeLeft = 25; 
     let isRunning = false;
     let currentMode = 'focus'; 
-    
-    // ★ 新增：追蹤目前選取的任務 ID
     let currentTaskId = null;
 
     let stats = JSON.parse(localStorage.getItem('pomodoroStats')) || { totalSeconds: 0, completed: 0 };
@@ -18,8 +16,118 @@ $(document).ready(function() {
     }
 
     // ==========================================
-    // 2. 計時器核心功能
+    // 2. 白噪音控制
     // ==========================================
+    $('.sound-btn').click(function() {
+        const soundType = $(this).data('sound');
+        const audioElement = document.getElementById(`bgm-${soundType}`);
+        
+        $('audio[id^="bgm-"]').each(function() {
+            if (this !== audioElement) {
+                this.pause();
+                this.currentTime = 0; 
+            }
+        });
+
+        $('.sound-btn').removeClass('playing');
+        
+        if (audioElement.paused) {
+            audioElement.play();
+            $(this).addClass('playing');
+        } else {
+            audioElement.pause();
+        }
+    });
+
+    $('#stop-sound-btn').click(function() {
+        $('audio[id^="bgm-"]').each(function() {
+            this.pause();
+            this.currentTime = 0;
+        });
+        $('.sound-btn').removeClass('playing');
+    });
+
+    // ==========================================
+    // 3. 考試倒數功能 (★修復刪除功能)
+    // ==========================================
+    let exams = JSON.parse(localStorage.getItem('examData')) || [];
+    renderExams();
+
+    $('#add-exam-btn').click(function() {
+        const name = $('#exam-name').val().trim();
+        const date = $('#exam-date').val();
+        
+        if (name && date) {
+            exams.push({ id: Date.now(), name, date });
+            saveExams();
+            renderExams();
+            $('#exam-name').val('');
+            $('#exam-date').val('');
+        }
+    });
+
+    // ★ 修正點：使用 closest('.exam-item') 往上找正確的父層
+    $('#exam-list').on('click', '.delete-btn', function() {
+        // 舊的寫法：const id = $(this).parent().data('id'); (錯誤，找不到 ID)
+        
+        // 新的寫法：找到最近的 li.exam-item
+        const id = $(this).closest('.exam-item').data('id');
+        
+        exams = exams.filter(e => e.id !== id);
+        saveExams();
+        renderExams();
+    });
+
+    function saveExams() {
+        localStorage.setItem('examData', JSON.stringify(exams));
+    }
+
+    function renderExams() {
+        const $list = $('#exam-list');
+        $list.empty();
+        
+        exams.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const today = new Date();
+        today.setHours(0,0,0,0); 
+
+        exams.forEach(exam => {
+            const examDate = new Date(exam.date);
+            const diffTime = examDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) return; 
+
+            const isUrgent = diffDays <= 3 ? 'urgent' : '';
+            const dayText = diffDays === 0 ? '今天!' : `${diffDays} 天`;
+
+            $list.append(`
+                <li class="exam-item ${isUrgent}" data-id="${exam.id}">
+                    <div class="exam-info">
+                        <span class="exam-name">${exam.name}</span>
+                        <span class="exam-date">${exam.date}</span>
+                    </div>
+                    <div>
+                        <span class="exam-days">${dayText}</span>
+                        <span class="delete-btn" style="margin-left:10px;">×</span>
+                    </div>
+                </li>
+            `);
+        });
+    }
+
+    // ==========================================
+    // 4. 計時器核心功能 (★加入專注模式變色)
+    // ==========================================
+    
+    // 輔助函式：切換專注模式外觀
+    function toggleFocusTheme(active) {
+        if (active && currentMode === 'focus') {
+            $('body').addClass('focus-mode');
+        } else {
+            $('body').removeClass('focus-mode');
+        }
+    }
+
     function formatTime(seconds) {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
@@ -34,6 +142,7 @@ $(document).ready(function() {
         clearInterval(timer);
         isRunning = false;
         toggleButtons();
+        toggleFocusTheme(false); // 切換模式時取消變色
 
         $('.mode-btn').removeClass('active');
         $(this).addClass('active');
@@ -47,12 +156,6 @@ $(document).ready(function() {
     $('#start-btn').click(function() {
         if (isRunning) return;
         
-        // 檢查：如果是專注模式，建議要選一個任務 (但不是強制)
-        if (currentMode === 'focus' && !currentTaskId) {
-            // 可以選擇 alert 提醒，或者不強制
-            // alert("建議先選擇一個任務再開始喔！");
-        }
-
         if (timeLeft <= 0) {
             const seconds = parseInt($('.mode-btn.active').data('time'));
             timeLeft = seconds;
@@ -61,7 +164,8 @@ $(document).ready(function() {
 
         isRunning = true;
         toggleButtons();
-        playSound('start'); // 播放開始音效 (選擇性)
+        toggleFocusTheme(true); // ★ 開始計時：變身！
+        playSound('start'); 
 
         timer = setInterval(function() {
             timeLeft--;
@@ -79,6 +183,7 @@ $(document).ready(function() {
         clearInterval(timer);
         isRunning = false;
         toggleButtons();
+        toggleFocusTheme(false); // ★ 暫停：回復原狀
     });
 
     $('#reset-btn').click(function() {
@@ -88,6 +193,7 @@ $(document).ready(function() {
         timeLeft = seconds;
         updateDisplay();
         toggleButtons();
+        toggleFocusTheme(false); // ★ 重置：回復原狀
     });
 
     function toggleButtons() {
@@ -100,27 +206,25 @@ $(document).ready(function() {
         }
     }
 
-    // --- 計時結束處理 ---
     function timerFinished() {
         toggleButtons(); 
-        playSound('alarm'); // 播放鬧鐘聲
+        toggleFocusTheme(false); // ★ 時間到：回復原狀
+        playSound('alarm');
         
         if (currentMode === 'focus') {
             startFireworks(); 
             
-            // 1. 全域統計更新
             stats.completed++;
             stats.totalSeconds += parseInt($('.mode-btn[data-mode="focus"]').data('time'));
             localStorage.setItem('pomodoroStats', JSON.stringify(stats));
             updateStatsDisplay();
 
-            // 2. ★ 任務進度更新 (如果有選取任務)
             if (currentTaskId) {
                 const taskIndex = tasks.findIndex(t => t.id === currentTaskId);
                 if (taskIndex !== -1) {
-                    tasks[taskIndex].act++; // 增加該任務的完成數
+                    tasks[taskIndex].act++;
                     saveTasks();
-                    renderTasks(); // 重新渲染以更新進度條
+                    renderTasks();
                 }
             }
         }
@@ -133,7 +237,6 @@ $(document).ready(function() {
             setTimeout(() => alert("時間到！"), 200); 
         }
 
-        // 自動重置
         const seconds = parseInt($('.mode-btn.active').data('time'));
         timeLeft = seconds; 
         updateDisplay(); 
@@ -144,7 +247,6 @@ $(document).ready(function() {
         $('#completed-poms').text(stats.completed);
     }
 
-    // 播放音效輔助函式
     function playSound(type) {
         const audio = document.getElementById('alarm-sound');
         if (type === 'alarm') {
@@ -153,20 +255,15 @@ $(document).ready(function() {
     }
 
     // ==========================================
-    // 3. 任務清單功能 (大幅升級)
+    // 5. 任務清單功能
     // ==========================================
-    // 讀取任務，注意要處理舊資料可能沒有 est/act 欄位的問題
     let tasks = JSON.parse(localStorage.getItem('pomodoroTasks')) || [];
-    
-    // 資料遷移：確保舊資料有新欄位
     tasks.forEach(t => {
         if (!t.est) t.est = 1;
         if (!t.act) t.act = 0;
     });
-
     renderTasks();
 
-    // 新增任務
     $('#add-task-btn').click(function() {
         const name = $('#task-name').val().trim();
         const tag = $('#task-tag').val();
@@ -174,14 +271,7 @@ $(document).ready(function() {
         if(est < 1) est = 1;
 
         if (name) {
-            // ★ 資料結構：id, name, tag, est(預估), act(實際)
-            const newTask = { 
-                id: Date.now(), 
-                name, 
-                tag, 
-                est: est, 
-                act: 0 
-            };
+            const newTask = { id: Date.now(), name, tag, est: est, act: 0 };
             tasks.push(newTask);
             saveTasks();
             renderTasks();
@@ -190,30 +280,21 @@ $(document).ready(function() {
         }
     });
 
-    // 點擊任務 -> 設定為當前任務
     $('#task-list').on('click', '.task-item', function(e) {
-        // 如果點到刪除按鈕，不觸發選取
         if ($(e.target).hasClass('delete-btn')) return;
-
-        // 取得點擊的任務 ID
         const id = $(this).data('id');
         currentTaskId = id;
-        
-        renderTasks(); // 重新渲染以更新選取樣式
+        renderTasks(); 
         updateCurrentTaskDisplay();
     });
 
-    // 刪除任務
     $('#task-list').on('click', '.delete-btn', function(e) {
-        e.stopPropagation(); // 阻止事件冒泡到 li
-        const id = $(this).parent().parent().data('id'); // 結構變了，要往上找兩層 (div -> li)
-        
-        // 如果刪除的是當前任務，清空當前任務
+        e.stopPropagation();
+        const id = $(this).parent().parent().data('id'); 
         if (id === currentTaskId) {
             currentTaskId = null;
             updateCurrentTaskDisplay();
         }
-
         tasks = tasks.filter(t => t.id !== id);
         saveTasks();
         renderTasks();
@@ -223,7 +304,6 @@ $(document).ready(function() {
         localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
     }
 
-    // 更新上方「正在進行」文字
     function updateCurrentTaskDisplay() {
         const $display = $('#current-task-label');
         if (currentTaskId) {
@@ -245,9 +325,7 @@ $(document).ready(function() {
         
         tasks.forEach(task => {
             const tagLabel = getTagLabel(task.tag);
-            // 計算進度百分比
             const percent = Math.min((task.act / task.est) * 100, 100); 
-            // 判斷是否為選取狀態
             const activeClass = (task.id === currentTaskId) ? 'selected-task' : '';
 
             $list.append(`
@@ -276,7 +354,7 @@ $(document).ready(function() {
     }
 
     // ==========================================
-    // 4. 煙火系統
+    // 6. 煙火系統
     // ==========================================
     const canvas = document.getElementById('fireworks-canvas');
     const ctx = canvas.getContext('2d');
