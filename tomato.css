@@ -1,0 +1,133 @@
+/* 全域設定 */
+body {
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; /* 微軟正黑體 */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 漸層背景 */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 420px;
+    z-index: 10;
+    position: relative;
+}
+
+header { text-align: center; margin-bottom: 20px; }
+h1 { margin: 0; color: #444; font-size: 1.8rem; }
+#stats-panel { font-size: 0.85rem; color: #666; margin-top: 8px; background: #eee; display: inline-block; padding: 4px 12px; border-radius: 12px;}
+
+/* 當前任務顯示區 (新增) */
+.current-task-display {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #555;
+    min-height: 1.5em;
+}
+.current-task-display .placeholder { color: #aaa; font-weight: normal; font-size: 0.9rem; font-style: italic; }
+.current-task-display .active-tag { color: #d9534f; }
+
+/* 計時器 */
+.timer-section { text-align: center; margin-bottom: 30px; }
+.timer-display { font-size: 4.5rem; font-weight: 700; color: #333; margin: 10px 0; font-variant-numeric: tabular-nums; /* 數字等寬 */ }
+
+.mode-btn, .timer-controls button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin: 0 4px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.mode-btn { background: #f0f0f0; color: #666; }
+.mode-btn.active { background: #d9534f; color: white; box-shadow: 0 2px 5px rgba(217, 83, 79, 0.4); }
+
+#start-btn { background: #5cb85c; color: white; font-size: 1.1rem; padding: 10px 25px; }
+#start-btn:hover { background: #4cae4c; transform: translateY(-2px); }
+#pause-btn { background: #f0ad4e; color: white; display: none; padding: 10px 25px;}
+#reset-btn { background: #d9534f; color: white; }
+
+/* 任務列表 */
+.task-section { border-top: 2px dashed #eee; padding-top: 20px; }
+.task-input-group { display: flex; gap: 8px; margin-bottom: 15px; }
+#task-name { flex: 3; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+#task-est { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; }
+#task-tag { flex: 1.5; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+#add-task-btn { background: #0275d8; color: white; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer; }
+
+#task-list { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; }
+
+/* 任務項目樣式 (升級) */
+.task-item { 
+    background: #fff; 
+    border: 1px solid #eee; 
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 選中狀態 */
+.task-item.selected-task {
+    border-color: #d9534f;
+    background-color: #fff5f5;
+    box-shadow: 0 2px 8px rgba(217, 83, 79, 0.15);
+}
+.task-item.selected-task::before {
+    content: '正在執行';
+    position: absolute;
+    top: 0; right: 0;
+    background: #d9534f;
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.task-title { font-weight: bold; font-size: 1rem; }
+
+/* 進度條容器 */
+.progress-container {
+    background: #eee;
+    height: 6px;
+    border-radius: 3px;
+    margin-top: 5px;
+    position: relative;
+}
+.progress-bar {
+    background: #5cb85c;
+    height: 100%;
+    border-radius: 3px;
+    width: 0%; /* JS 控制 */
+    transition: width 0.5s ease;
+}
+.progress-text {
+    font-size: 0.75rem; color: #888; margin-left: 5px;
+}
+
+.task-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: white; margin-right: 8px; vertical-align: middle; }
+.tag-coding { background-color: #5bc0de; }
+.tag-study { background-color: #f0ad4e; }
+.tag-meeting { background-color: #d9534f; }
+.tag-exercise { background-color: #5cb85c; }
+
+.delete-btn { color: #ccc; cursor: pointer; padding: 0 5px; }
+.delete-btn:hover { color: red; }
+
+#fireworks-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; 
+}
