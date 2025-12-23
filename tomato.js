@@ -1,7 +1,5 @@
 $(document).ready(function() {
-    // ==========================================
-    // 1. 變數與基礎設定
-    // ==========================================
+    // 1. 變數與基礎設置
     let timer;
     let timeLeft = 25; 
     let isRunning = false;
@@ -15,9 +13,7 @@ $(document).ready(function() {
         Notification.requestPermission();
     }
 
-    // ==========================================
     // 2. 白噪音控制
-    // ==========================================
     $('.sound-btn').click(function() {
         const soundType = $(this).data('sound');
         const audioElement = document.getElementById(`bgm-${soundType}`);
@@ -46,10 +42,8 @@ $(document).ready(function() {
         });
         $('.sound-btn').removeClass('playing');
     });
-
-    // ==========================================
-    // 3. 考試倒數功能 (★修復刪除功能)
-    // ==========================================
+    
+    // 3. 考試倒數功能
     let exams = JSON.parse(localStorage.getItem('examData')) || [];
     renderExams();
 
@@ -66,11 +60,7 @@ $(document).ready(function() {
         }
     });
 
-    // ★ 修正點：使用 closest('.exam-item') 往上找正確的父層
     $('#exam-list').on('click', '.delete-btn', function() {
-        // 舊的寫法：const id = $(this).parent().data('id'); (錯誤，找不到 ID)
-        
-        // 新的寫法：找到最近的 li.exam-item
         const id = $(this).closest('.exam-item').data('id');
         
         exams = exams.filter(e => e.id !== id);
@@ -116,7 +106,7 @@ $(document).ready(function() {
     }
 
     // ==========================================
-    // 4. 計時器核心功能 (★加入專注模式變色)
+    // 4. 計時器核心功能
     // ==========================================
     
     // 輔助函式：切換專注模式外觀
@@ -164,7 +154,7 @@ $(document).ready(function() {
 
         isRunning = true;
         toggleButtons();
-        toggleFocusTheme(true); // ★ 開始計時：變身！
+        toggleFocusTheme(true); 
         playSound('start'); 
 
         timer = setInterval(function() {
@@ -183,7 +173,7 @@ $(document).ready(function() {
         clearInterval(timer);
         isRunning = false;
         toggleButtons();
-        toggleFocusTheme(false); // ★ 暫停：回復原狀
+        toggleFocusTheme(false); 
     });
 
     $('#reset-btn').click(function() {
@@ -193,7 +183,7 @@ $(document).ready(function() {
         timeLeft = seconds;
         updateDisplay();
         toggleButtons();
-        toggleFocusTheme(false); // ★ 重置：回復原狀
+        toggleFocusTheme(false); 
     });
 
     function toggleButtons() {
@@ -208,7 +198,7 @@ $(document).ready(function() {
 
     function timerFinished() {
         toggleButtons(); 
-        toggleFocusTheme(false); // ★ 時間到：回復原狀
+        toggleFocusTheme(false);
         playSound('alarm');
         
         if (currentMode === 'focus') {
@@ -254,9 +244,8 @@ $(document).ready(function() {
         }
     }
 
-    // ==========================================
+    
     // 5. 任務清單功能
-    // ==========================================
     let tasks = JSON.parse(localStorage.getItem('pomodoroTasks')) || [];
     tasks.forEach(t => {
         if (!t.est) t.est = 1;
@@ -353,9 +342,8 @@ $(document).ready(function() {
         return map[tag] || tag;
     }
 
-    // ==========================================
+    
     // 6. 煙火系統
-    // ==========================================
     const canvas = document.getElementById('fireworks-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -428,3 +416,4 @@ $(document).ready(function() {
         }
     }
 });
+
