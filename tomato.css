@@ -1,33 +1,77 @@
 /* 全域設定 */
 body {
     font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-    background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%); /* 改個比較沉穩的讀書配色 */
+    background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
     color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 20px 0; /* 避免手機版太貼邊 */
+    padding: 20px;
+    overflow-x: hidden;
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    width: 90%;
-    max-width: 450px; /* 稍微加寬一點 */
+    width: 95%;
+    max-width: 1200px;
     z-index: 10;
     position: relative;
     box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr; 
+    gap: 20px;
+    align-items: start;
+    height: 85vh; 
+}
+
+.panel {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+
+.col-right.panel {
+    overflow-y: auto; 
+    scrollbar-width: thin;
+}
+.col-right.panel::-webkit-scrollbar { width: 6px; }
+.col-right.panel::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 3px; }
+
+.panel h2 {
+    font-size: 1.2rem;
+    color: #3f2b96;
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #eee;
+}
+
+.exam-section { flex-grow: 1; display: flex; flex-direction: column; overflow-y: hidden; }
+.task-section { flex-shrink: 0; margin-bottom: 20px; }
+
+.chart-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #eee;
+}
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
 }
 
 header { text-align: center; margin-bottom: 20px; }
 h1 { margin: 0; color: #3f2b96; font-size: 1.8rem; }
-#stats-panel { font-size: 0.85rem; color: #666; margin-top: 8px; background: #eee; display: inline-block; padding: 4px 12px; border-radius: 12px;}
+#stats-panel { font-size: 0.9rem; color: #666; margin-top: 8px; background: #eee; display: inline-block; padding: 4px 12px; border-radius: 12px; font-weight: bold;}
 
-/* --- (1) 白噪音控制區樣式 --- */
 .sound-controls {
     margin: 15px 0;
     padding: 10px;
@@ -37,6 +81,7 @@ h1 { margin: 0; color: #3f2b96; font-size: 1.8rem; }
     justify-content: center;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 .sound-controls span { font-size: 0.9rem; color: #555; font-weight: bold; }
 .sound-btn, #stop-sound-btn {
@@ -50,7 +95,6 @@ h1 { margin: 0; color: #3f2b96; font-size: 1.8rem; }
     display: flex; align-items: center; justify-content: center;
 }
 .sound-btn:hover { background: #eee; }
-/* 播放中的按鈕樣式 */
 .sound-btn.playing {
     background: #3f2b96;
     color: white;
@@ -59,12 +103,11 @@ h1 { margin: 0; color: #3f2b96; font-size: 1.8rem; }
     animation: pulse 2s infinite;
 }
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); }
 }
 
-/* 當前任務顯示區 */
+.col-center { justify-content: flex-start; }
+
 .current-task-display {
     text-align: center;
     margin-bottom: 15px;
@@ -76,134 +119,106 @@ h1 { margin: 0; color: #3f2b96; font-size: 1.8rem; }
 .current-task-display .placeholder { color: #aaa; font-weight: normal; font-size: 0.9rem; font-style: italic; }
 .current-task-display .active-tag { color: #d9534f; }
 
-/* 計時器 */
-.timer-section { text-align: center; margin-bottom: 30px; }
-.timer-display { font-size: 4.5rem; font-weight: 700; color: #333; margin: 10px 0; font-variant-numeric: tabular-nums; }
+.timer-section { text-align: center; margin-bottom: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center;}
+.timer-display { 
+    font-size: 4rem; 
+    font-weight: 700; 
+    color: #333; 
+    margin: 20px 0; 
+    font-variant-numeric: tabular-nums; 
+    letter-spacing: 2px;
+}
 
 .mode-btn, .timer-controls button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    margin: 0 4px;
-    font-weight: 500;
-    transition: all 0.2s;
+    padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer; margin: 0 4px; font-weight: 500; transition: all 0.2s;
 }
-.mode-btn { background: #f0f0f0; color: #666; }
-.mode-btn.active { background: #3f2b96; color: white; }
+.mode-btn { background: #f0f0f0; color: #666; margin-bottom: 10px; font-size: 1rem;}
+.mode-btn.active { background: #3f2b96; color: white; transform: scale(1.05); }
 
-#start-btn { background: #5cb85c; color: white; font-size: 1.1rem; padding: 10px 25px; }
-#pause-btn { background: #f0ad4e; color: white; display: none; padding: 10px 25px;}
+#start-btn { background: #5cb85c; color: white; font-size: 1.2rem; padding: 12px 30px; }
+#pause-btn { background: #f0ad4e; color: white; display: none; padding: 12px 30px;}
 #reset-btn { background: #d9534f; color: white; }
 
-/* 輸入群組通用樣式 */
-.task-input-group { display: flex; gap: 8px; margin-bottom: 10px; }
+
+.task-input-group { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+
 input[type="text"], input[type="number"], input[type="date"], select {
-    padding: 10px; border: 1px solid #ddd; border-radius: 8px; flex: 1;
+    padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;
 }
-#add-task-btn, #add-exam-btn { background: #0275d8; color: white; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer; }
+input[type="text"] { min-width: 80px; flex: 1; } 
+input[type="number"] { flex: none; } 
 
-/* --- (2) 考試倒數列表樣式 --- */
-.exam-section { border-top: 2px dashed #eee; padding-top: 20px; margin-bottom: 20px; }
-#exam-list { list-style: none; padding: 0; }
+#task-tag-input { flex: 1.2; }
+
+#add-task-btn, #add-exam-btn { background: #0275d8; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+#toggle-tag-mgr-btn { color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+
+#tag-management-area {
+    background: #f1f3f5; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; animation: fadeIn 0.3s;
+}
+.tag-mgr-title { font-size: 0.8rem; color: #666; margin-bottom: 5px; }
+#tag-chips-container { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.deletable-tag {
+    font-size: 0.8rem; padding: 4px 10px; border-radius: 15px; color: white; cursor: pointer;
+    display: inline-flex; align-items: center; transition: all 0.2s; user-select: none;
+}
+.deletable-tag:hover { opacity: 0.8; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.deletable-tag i { margin-left: 5px; font-size: 0.7rem; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+
+#exam-list { list-style: none; padding: 0; overflow-y: auto; flex-grow: 1; }
 .exam-item {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.95rem;
+    background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; padding: 10px; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;
 }
-.exam-info { display: flex; flex-direction: column; }
-.exam-name { font-weight: bold; color: #333; }
-.exam-date { font-size: 0.8rem; color: #888; }
-.exam-days { font-weight: bold; font-size: 1.2rem; color: #28a745; background: #e6f9ea; padding: 2px 8px; border-radius: 5px; }
-
-/* 警示效果：剩餘 3 天內 */
-.exam-item.urgent { border-left: 5px solid #dc3545; background-color: #fff5f5; }
+.exam-info { display: flex; flex-direction: column; overflow: hidden; }
+.exam-name { font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.exam-date { font-size: 0.75rem; color: #888; }
+.exam-days { font-weight: bold; font-size: 1rem; color: #28a745; background: #e6f9ea; padding: 2px 6px; border-radius: 4px; margin-right: 5px;}
+.exam-item.urgent { border-left: 4px solid #dc3545; background-color: #fff5f5; }
 .exam-item.urgent .exam-days { color: #dc3545; background: #ffebeb; animation: shake 0.5s; }
-
 @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-2px); }
-    50% { transform: translateX(2px); }
-    75% { transform: translateX(-2px); }
-    100% { transform: translateX(0); }
+    0% { transform: translateX(0); } 25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); }
 }
 
-/* 任務列表 */
-.task-section { border-top: 2px dashed #eee; padding-top: 20px; }
-#task-list { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; }
-
+#task-list { list-style: none; padding: 0; overflow-y: auto; max-height: 250px; }
 .task-item { 
-    background: #fff; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; padding: 12px;
+    background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; padding: 10px;
     cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
 }
+.task-item:hover { background: #f0f0f0; }
 .task-item.selected-task { border-color: #3f2b96; background-color: #f3f0ff; }
 .task-item.selected-task::before {
-    content: '正在執行'; position: absolute; top: 0; right: 0; background: #3f2b96; color: white;
+    content: '進行中'; position: absolute; top: 0; right: 0; background: #3f2b96; color: white;
     font-size: 0.6rem; padding: 2px 6px; border-bottom-left-radius: 6px;
 }
 .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.progress-container { background: #eee; height: 6px; border-radius: 3px; margin-top: 5px; }
-.progress-bar { background: #5cb85c; height: 100%; border-radius: 3px; width: 0%; transition: width 0.5s ease; }
-.progress-text { font-size: 0.75rem; color: #888; margin-left: 5px; }
+.progress-container { background: #eee; height: 8px; border-radius: 4px; margin-top: 5px; }
+.progress-bar { background: #5cb85c; height: 100%; border-radius: 4px; width: 0%; transition: width 0.5s linear; }
+.progress-text { font-size: 0.75rem; color: #888; margin-left: 5px; margin-top: 2px;}
 
-.task-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: white; margin-right: 8px; }
-.tag-coding { background-color: #5bc0de; }
-.tag-study { background-color: #f0ad4e; }
-.tag-meeting { background-color: #d9534f; }
-.tag-exercise { background-color: #5cb85c; }
+.task-tag { 
+    font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; color: white; 
+    margin-right: 5px; font-weight: bold; text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
 .delete-btn { color: #ccc; cursor: pointer; padding: 0 5px; }
 .delete-btn:hover { color: red; }
 
 #fireworks-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
 
-/* --- 沉浸式專注模式樣式 --- */
-/* 當 body 有 .focus-mode class 時觸發 */
-body.focus-mode {
-    background: #1a1a2e; /* 深藍色夜間背景 */
-    transition: background 0.5s ease;
+body.focus-mode { background: #1a1a2e; transition: background 0.5s ease; }
+body.focus-mode .col-center.panel {
+    background: rgba(30, 30, 40, 0.95); box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); border: 1px solid #444;
 }
-
-/* 讓容器稍微變暗，突出計時器 */
-body.focus-mode .container {
-    background: rgba(30, 30, 40, 0.95);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    border: 1px solid #444;
+body.focus-mode .col-left.panel,
+body.focus-mode .col-right.panel {
+    opacity: 0.15; filter: blur(2px); background: #2a2a3a; pointer-events: none; transition: all 0.5s ease;
 }
-
-/* 文字顏色變更 */
 body.focus-mode h1, 
 body.focus-mode .timer-display,
 body.focus-mode #current-task-label,
-body.focus-mode .sound-controls span {
-    color: #e0e0e0;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-}
-
-/* 讓計時器數字發光 */
-body.focus-mode .timer-display {
-    color: #4cd137; /* 螢光綠 */
-    text-shadow: 0 0 20px rgba(76, 209, 55, 0.6);
-}
-
-/* 淡化其他不重要的區塊 (降低透明度) */
-body.focus-mode .task-section,
-body.focus-mode .exam-section,
-body.focus-mode header h1,
-body.focus-mode #stats-panel {
-    opacity: 0.3; /* 變得很淡 */
-    transition: opacity 0.5s ease;
-}
-
-/* 滑鼠移過去時回復清楚 (方便操作) */
-body.focus-mode .container:hover .task-section,
-body.focus-mode .container:hover .exam-section,
-body.focus-mode .container:hover header h1,
-body.focus-mode .container:hover #stats-panel {
-    opacity: 1;
-}
+body.focus-mode .sound-controls span { color: #e0e0e0; text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+body.focus-mode .timer-display { color: #4cd137; text-shadow: 0 0 20px rgba(76, 209, 55, 0.6); }
