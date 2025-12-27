@@ -3,85 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>備考衝刺番茄鐘</title>
+    <title>備考衝刺計時器</title>
     <link rel="stylesheet" href="tomato.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-graduation-cap"></i> 備考衝刺番茄鐘</h1>
-            
-            <div class="sound-controls">
-                <span><i class="fas fa-headphones-alt"></i> 白噪音: </span>
-                <button class="sound-btn" data-sound="rain" title="雨聲"><i class="fas fa-cloud-showers-heavy"></i></button>
-                <button class="sound-btn" data-sound="fire" title="營火聲"><i class="fas fa-fire"></i></button>
-                <button class="sound-btn" data-sound="cafe" title="咖啡廳"><i class="fas fa-coffee"></i></button>
-                <button id="stop-sound-btn" title="靜音"><i class="fas fa-volume-mute"></i></button>
-            </div>
+    <div class="container main-grid">
+        
+        <div class="col-left panel">
+            <section class="exam-section">
+                <h2><i class="fas fa-hourglass-half"></i> 考試倒數</h2>
+                <div class="task-input-group">
+                    <input type="text" id="exam-name" placeholder="科目 (ex: 微積分)">
+                    <input type="date" id="exam-date">
+                    <button id="add-exam-btn"><i class="fas fa-plus"></i></button>
+                </div>
+                <ul id="exam-list"></ul>
+            </section>
+        </div>
 
-            <div id="stats-panel">
-                今日專注: <span id="total-focus-time">0</span> 秒 | 累積番茄: <span id="completed-poms">0</span> 顆
-            </div>
-        </header>
+        <div class="col-center panel">
+            <header>
+                <h1><i class="fas fa-graduation-cap"></i> 備考衝刺計時器</h1>
+                <div class="sound-controls">
+                    <span><i class="fas fa-headphones-alt"></i> 白噪音: </span>
+                    <button class="sound-btn" data-sound="rain" title="雨聲"><i class="fas fa-cloud-showers-heavy"></i></button>
+                    <button class="sound-btn" data-sound="fire" title="營火聲"><i class="fas fa-fire"></i></button>
+                    <button class="sound-btn" data-sound="cafe" title="咖啡廳"><i class="fas fa-coffee"></i></button>
+                    <button id="stop-sound-btn" title="靜音"><i class="fas fa-volume-mute"></i></button>
+                </div>
+                <div id="stats-panel">
+                    今日專注: <span id="total-focus-time-display">0小時 0分鐘</span>
+                </div>
+            </header>
+            <section class="timer-section">
+                <div class="current-task-display" id="current-task-label">
+                    <span class="placeholder">請選擇右側任務開始計時...</span>
+                </div>
+                
+                <div class="timer-modes">
+                    <button class="mode-btn active" data-mode="focus">🔥 專注模式</button>
+                    <button class="mode-btn" data-mode="rest">☕ 休息模式</button>
+                </div>
+                
+                <div class="timer-display">00:00:00</div>
+                
+                <div class="timer-controls">
+                    <button id="start-btn"><i class="fas fa-play"></i> 開始</button>
+                    <button id="pause-btn"><i class="fas fa-pause"></i> 暫停</button>
+                    <button id="reset-btn"><i class="fas fa-undo"></i> 重置計時</button>
+                </div>
+            </section>
+        </div>
 
-        <section class="timer-section">
-            <div class="current-task-display" id="current-task-label">
-                <span class="placeholder">請選擇下方任務開始計時...</span>
-            </div>
+        <div class="col-right panel">
+            <section class="task-section">
+                <h2><i class="fas fa-tasks"></i> 待辦事項</h2>
+                
+                <div class="task-input-group">
+                    <input type="text" id="task-name" placeholder="輸入任務...">
+                    
+                    <div style="display: flex; align-items: center; gap: 2px;">
+                        <input type="number" id="task-est-h" placeholder="時" min="0" value="0" style="width: 45px; text-align: center;">
+                        <span style="font-size: 0.8rem; font-weight: bold;">:</span>
+                        <input type="number" id="task-est-m" placeholder="分" min="0" max="59" value="30" style="width: 45px; text-align: center;">
+                    </div>
+                    
+                    <input type="text" id="task-tag-input" list="tag-options" placeholder="科目標籤">
+                    <datalist id="tag-options">
+                        </datalist>
 
-            <div class="timer-modes">
-                <button class="mode-btn active" data-time="25" data-mode="focus">專注 (25秒)</button>
-                <button class="mode-btn" data-time="5" data-mode="short">短休息 (5秒)</button>
-                <button class="mode-btn" data-time="10" data-mode="long">長休息 (10秒)</button>
-            </div>
-            
-            <div class="timer-display">00:25</div>
-            
-            <div class="timer-controls">
-                <button id="start-btn"><i class="fas fa-play"></i> 開始</button>
-                <button id="pause-btn"><i class="fas fa-pause"></i> 暫停</button>
-                <button id="reset-btn"><i class="fas fa-undo"></i> 重置</button>
-            </div>
-        </section>
+                    <button id="toggle-tag-mgr-btn" title="管理/刪除標籤" style="background: #6c757d;"><i class="fas fa-tags"></i></button>
+                    <button id="add-task-btn"><i class="fas fa-plus"></i></button>
+                </div>
 
-        <section class="exam-section">
-            <h2><i class="fas fa-hourglass-half"></i> 考試倒數</h2>
-            <div class="task-input-group">
-                <input type="text" id="exam-name" placeholder="科目 (ex: 微積分)">
-                <input type="date" id="exam-date">
-                <button id="add-exam-btn"><i class="fas fa-plus"></i></button>
-            </div>
-            <ul id="exam-list">
-                </ul>
-        </section>
+                <div id="tag-management-area" style="display: none;">
+                    <div class="tag-mgr-title">點擊標籤以刪除:</div>
+                    <div id="tag-chips-container"></div>
+                </div>
 
-        <section class="task-section">
-            <h2><i class="fas fa-tasks"></i> 待辦事項</h2>
-            <div class="task-input-group">
-                <input type="text" id="task-name" placeholder="輸入任務名稱...">
-                <input type="number" id="task-est" placeholder="預估番茄數" min="1" value="1" style="width: 55px;">
-                <select id="task-tag">
-                    <option value="coding">程式</option>
-                    <option value="study">讀書</option>
-                    <option value="meeting">會議</option>
-                    <option value="exercise">運動</option>
-                </select>
-                <button id="add-task-btn"><i class="fas fa-plus"></i></button>
-            </div>
-            <ul id="task-list"></ul>
-        </section>
+                <ul id="task-list"></ul>
+            </section>
+
+            <section class="chart-section">
+                <h2><i class="fas fa-chart-pie"></i> 時間統計 (分鐘)</h2>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="chart-container" style="margin-top: 15px;">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </section>
+        </div>
+
     </div>
 
     <canvas id="fireworks-canvas"></canvas>
     
-    <audio id="alarm-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
     <audio id="bgm-rain" loop src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"></audio>
     <audio id="bgm-fire" loop src="https://actions.google.com/sounds/v1/ambiences/fire.ogg"></audio>
     <audio id="bgm-cafe" loop src="https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg"></audio>
 
-    <script src="tomato.js"></script>
+    <script src="final.js"></script>
 </body>
 </html>
